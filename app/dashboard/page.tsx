@@ -9,7 +9,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     fetch("/api/me", {
-      credentials: "include", // ✅ Add this
+      credentials: "include",
     })
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);

@@ -33,7 +33,7 @@ export async function GET(req: Request) {
 
   const response = NextResponse.redirect("http://127.0.0.1:3000/dashboard");
 
-  // 🔐 Store tokens securely
+  //Store tokens securely
   response.cookies.set("spotify_access_token", tokenData.access_token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
