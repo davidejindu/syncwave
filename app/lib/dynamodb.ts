@@ -1,5 +1,5 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, PutCommand, GetCommand } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocumentClient, PutCommand, GetCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 
 const client = new DynamoDBClient({
   region: process.env.AWS_REGION!,
@@ -20,6 +20,7 @@ export interface Job {
   type: "PLAYLIST_MIGRATION";
   status: JobStatus;
   spotifyUserId: string;
+  spotifyRefreshToken: string;
   displayName?: string;
   playlistUrls: string[];
   options: {
@@ -33,6 +34,14 @@ export interface Job {
   createdAt: string;
   updatedAt: string;
   error?: string;
+  result?: { 
+    spotifyPlaylistId: string;
+    spotifyPlaylistUrl: string;
+    spotifyPlaylistName: string;
+    matched: number;
+    failed: number;
+    failedSongs: string[];
+  };
 }
 
 export async function createJob(job: Job): Promise<void> {
@@ -53,4 +62,29 @@ export async function getJob(jobId: string): Promise<Job | null> {
   );
 
   return result.Item as Job | null;
+}
+
+export async function updateJob(
+  jobId: string,
+  updates: Partial<Job>
+): Promise<void> {
+  const updateExpression: string[] = [];
+  const expressionAttributeValues: any = {};
+  const expressionAttributeNames: any = {};
+
+  Object.entries(updates).forEach(([key, value]) => {
+    updateExpression.push(`#${key} = :${key}`);
+    expressionAttributeNames[`#${key}`] = key;
+    expressionAttributeValues[`:${key}`] = value;
+  });
+
+  await docClient.send(
+    new UpdateCommand({
+      TableName: TABLE_NAME,
+      Key: { jobId },
+      UpdateExpression: `SET ${updateExpression.join(", ")}`,
+      ExpressionAttributeNames: expressionAttributeNames,
+      ExpressionAttributeValues: expressionAttributeValues,
+    })
+  );
 }

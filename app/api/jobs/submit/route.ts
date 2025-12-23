@@ -23,8 +23,9 @@ export async function POST(req: Request) {
   // 1. Authenticate user via cookies
   const cookieStore = await cookies();
   const refreshToken = cookieStore.get("spotify_refresh_token")?.value;
+  const accessToken = cookieStore.get("spotify_access_token")?.value;
 
-  if (!refreshToken) {
+  if (!refreshToken || !accessToken) {
     return NextResponse.json(
       { error: "Not authenticated" },
       { status: 401 }
@@ -32,15 +33,6 @@ export async function POST(req: Request) {
   }
 
   // 2. Get user identity from Spotify
-  const accessToken = cookieStore.get("spotify_access_token")?.value;
-  
-  if (!accessToken) {
-    return NextResponse.json(
-      { error: "No access token - please refresh" },
-      { status: 401 }
-    );
-  }
-
   const spotifyRes = await fetch("https://api.spotify.com/v1/me", {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
@@ -120,6 +112,7 @@ export async function POST(req: Request) {
     type: "PLAYLIST_MIGRATION",
     status: "queued",
     spotifyUserId,
+    spotifyRefreshToken: refreshToken,
     displayName,
     playlistUrls,
     options: {
