@@ -27,9 +27,28 @@ export async function GET(req: Request) {
 
   const tokenData = await tokenRes.json();
 
-  // TEMP: log to confirm
-  console.log("Spotify tokens:", tokenData);
+  if (!tokenRes.ok) {
+    return NextResponse.json(tokenData, { status: 500 });
+  }
 
-  return NextResponse.redirect("http://localhost:3000/dashboard");
+  const response = NextResponse.redirect("http://127.0.0.1:3000/dashboard");
 
+  // 🔐 Store tokens securely
+  response.cookies.set("spotify_access_token", tokenData.access_token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: tokenData.expires_in, // seconds
+  });
+
+  response.cookies.set("spotify_refresh_token", tokenData.refresh_token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 30, // 30 days
+  });
+
+  return response;
 }
