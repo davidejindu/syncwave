@@ -1,25 +1,33 @@
-import { cookies } from "next/headers";
+"use client";
 
-export default async function DashboardPage() {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get("spotify_access_token")?.value;
+import { useEffect, useState } from "react";
 
-  if (!accessToken) {
-    return <p>Not authenticated</p>;
-  }
+export default function DashboardPage() {
+  const [profile, setProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const res = await fetch("https://api.spotify.com/v1/me", {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-    cache: "no-store",
-  });
+  useEffect(() => {
+    fetch("/api/me", {
+      credentials: "include", // ✅ Add this
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then((data) => {
+        setProfile(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, []);
 
-  if (!res.ok) {
-    return <p>Failed to load profile</p>;
-  }
-
-  const profile = await res.json();
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error}</p>;
+  if (!profile) return <p>Not authenticated</p>;
 
   return (
     <main style={{ padding: "2rem" }}>
