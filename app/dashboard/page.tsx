@@ -249,23 +249,35 @@ export default function DashboardPage() {
       credentials: "include",
     })
       .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        if (!res.ok) {
+          // 🆕 If 401, redirect to login instead of showing error
+          if (res.status === 401) {
+            window.location.href = "/api/auth/spotify/login";
+            return; // Stop processing
+          }
+          throw new Error(`HTTP ${res.status}`);
+        }
         return res.json();
       })
       .then((data) => {
+        if (!data) return; // Handle redirect case
         setProfile(data);
         return fetch("/api/jobs/list", { credentials: "include" });
       })
       .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        if (!res || !res.ok) return;
         return res.json();
       })
       .then((data) => {
+        if (!data) return;
         setJobs(data.jobs || []);
         setLoading(false);
       })
       .catch((err) => {
-        setError(err.message);
+        // Don't show error if we're redirecting
+        if (err.message !== "Redirecting") {
+          setError(err.message);
+        }
         setLoading(false);
       });
   }, []);
