@@ -117,7 +117,7 @@ async function processJob(jobMessage: any) {
   const matchedTracks: string[] = [];
   const failedSongs: string[] = [];
   
-  // 🆕 Cache tracking
+  //Cache tracking
   let cacheHits = 0;
   let spotifyApiCalls = 0;
 
@@ -134,7 +134,7 @@ async function processJob(jobMessage: any) {
       updatedAt: new Date().toISOString(),
     });
 
-    // 🆕 CHECK CACHE FIRST
+    //CHECK CACHE FIRST
     const cachedUri = await getCachedMatch(video.title);
     
     if (cachedUri) {
@@ -172,7 +172,7 @@ async function processJob(jobMessage: any) {
     if (match.spotifyTrack && match.confidence >= 35) {
       matchedTracks.push(match.spotifyTrack.uri);
       
-      // 🆕 CACHE SUCCESSFUL MATCH
+      //CACHE SUCCESSFUL MATCH
       await setCachedMatch(
         video.title,
         match.spotifyTrack.uri,
@@ -190,7 +190,7 @@ async function processJob(jobMessage: any) {
     await sleep(100);
   }
 
-  // 🆕 LOG CACHE STATS
+  // LOG CACHE STATS
   const totalAttempts = cacheHits + spotifyApiCalls;
   const reduction = totalAttempts > 0 
     ? Math.round((cacheHits / totalAttempts) * 100) 

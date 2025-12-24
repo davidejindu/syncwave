@@ -1,7 +1,7 @@
 export interface YouTubeVideo {
     title: string;
     videoId: string;
-    duration: number; // seconds
+    duration: number; 
   }
   
   export interface YouTubePlaylist {
@@ -105,7 +105,6 @@ export interface YouTubeVideo {
   }
   
   function parseISO8601Duration(duration: string): number {
-    // Parse ISO 8601 duration format (e.g., "PT4M33S" → 273 seconds)
     const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
     
     if (!match) return 0;
