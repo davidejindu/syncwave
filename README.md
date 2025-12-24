@@ -1,4 +1,4 @@
-# SyncWave 🎵
+# SyncWave 
 
 **Distributed YouTube-to-Spotify playlist migration system with async queue processing and intelligent fuzzy matching**
 
@@ -6,14 +6,14 @@
 > Jobs are processed in the background while users receive real-time progress updates.
 
 ---
-🎥 Demo
+Demo
 
 ▶ Watch the full demo:
 https://www.youtube.com/watch?v=H2nwC8Jz3JQ
 
 ---
 
-## 📊 Key Metrics
+## Key Metrics
 
 - **91% match accuracy** across 1,000+ song migrations  
 - **73% Spotify API call reduction** via DynamoDB result caching  
@@ -22,23 +22,23 @@ https://www.youtube.com/watch?v=H2nwC8Jz3JQ
 
 ---
 
-## 🎯 What It Does
+## What It Does
 
 SyncWave migrates YouTube playlists to Spotify without forcing users to wait 30+ seconds for processing.
 
 Instead of synchronous execution, playlist migrations are queued and processed asynchronously while users can track progress in real time.
 
 ### Key Features
-- 🔐 OAuth 2.0 authentication with Spotify  
-- ⚡ Async processing using AWS SQS queues  
-- 🎯 Multi-factor fuzzy matching (title + artist + duration)  
-- 💾 DynamoDB result caching for performance  
-- 📊 Real-time progress tracking  
-- 🔄 Automatic token refresh  
+- OAuth 2.0 authentication with Spotify  
+- Async processing using AWS SQS queues  
+- Multi-factor fuzzy matching (title + artist + duration)  
+- DynamoDB result caching for performance  
+- Real-time progress tracking  
+- Automatic token refresh  
 
 ---
 
-## 🏗️ Architecture Overview
+## Architecture Overview
 
 ```text
 ┌─────────────────────────────────────────────────────────────┐
