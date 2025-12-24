@@ -233,8 +233,18 @@ export default function DashboardPage() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [playlistUrl, setPlaylistUrl] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
 
   useEffect(() => {
+    // Auto-start worker
+    fetch("/api/worker/auto-start", { credentials: "include" }).catch(() => {
+      console.log("Worker already running or failed to start");
+    });
+
+    // Fetch profile and jobs
     fetch("/api/me", {
       credentials: "include",
     })
@@ -335,6 +345,57 @@ export default function DashboardPage() {
     );
   }
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setSubmitError(null);
+    setSubmitSuccess(null);
+
+    try {
+      const res = await fetch("/api/jobs/submit", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          type: "PLAYLIST_MIGRATION",
+          source: {
+            platform: "youtube",
+            playlistUrls: [playlistUrl],
+          },
+          target: {
+            platform: "spotify",
+          },
+          options: {
+            visibility: "private",
+          },
+        }),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to submit job");
+      }
+
+      const data = await res.json();
+      setSubmitSuccess(`Job submitted! ID: ${data.jobId}`);
+      setPlaylistUrl("");
+
+      // Start worker if not already running (ignore if already running)
+      fetch("/api/worker/start", { credentials: "include" }).catch(() => {});
+
+      // Refresh jobs list
+      const jobsRes = await fetch("/api/jobs/list", { credentials: "include" });
+      const jobsData = await jobsRes.json();
+      setJobs(jobsData.jobs || []);
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <main
       style={{
@@ -416,6 +477,105 @@ export default function DashboardPage() {
           value={jobs.filter((j) => j.status === "failed").length}
           color="#FF4444"
         />
+      </div>
+
+      <div style={{ marginTop: "2rem", marginBottom: "2rem" }}>
+        <h2 style={{ fontSize: "1.5rem", marginBottom: "1rem", color: "#fff" }}>
+          Migrate YouTube Playlist
+        </h2>
+        <form onSubmit={handleSubmit}>
+          <div
+            style={{
+              backgroundColor: "#1a1a1a",
+              border: "1px solid #333",
+              borderRadius: "8px",
+              padding: "1.5rem",
+            }}
+          >
+            <div style={{ marginBottom: "1rem" }}>
+              <label
+                htmlFor="playlistUrl"
+                style={{
+                  display: "block",
+                  marginBottom: "0.5rem",
+                  color: "#888",
+                  fontSize: "0.9rem",
+                }}
+              >
+                YouTube Playlist URL
+              </label>
+              <input
+                id="playlistUrl"
+                type="text"
+                value={playlistUrl}
+                onChange={(e) => setPlaylistUrl(e.target.value)}
+                placeholder="https://www.youtube.com/playlist?list=..."
+                required
+                disabled={submitting}
+                style={{
+                  width: "100%",
+                  padding: "0.75rem",
+                  backgroundColor: "#0a0a0a",
+                  border: "1px solid #333",
+                  borderRadius: "4px",
+                  color: "#fff",
+                  fontSize: "1rem",
+                  outline: "none",
+                }}
+              />
+            </div>
+
+            {submitError && (
+              <div
+                style={{
+                  padding: "0.75rem",
+                  backgroundColor: "#2a1515",
+                  border: "1px solid #FF4444",
+                  borderRadius: "4px",
+                  marginBottom: "1rem",
+                }}
+              >
+                <div style={{ color: "#FF4444", fontSize: "0.9rem" }}>
+                  ❌ {submitError}
+                </div>
+              </div>
+            )}
+
+            {submitSuccess && (
+              <div
+                style={{
+                  padding: "0.75rem",
+                  backgroundColor: "#1a2a1a",
+                  border: "1px solid #1DB954",
+                  borderRadius: "4px",
+                  marginBottom: "1rem",
+                }}
+              >
+                <div style={{ color: "#1DB954", fontSize: "0.9rem" }}>
+                  ✅ {submitSuccess}
+                </div>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={submitting || !playlistUrl}
+              style={{
+                backgroundColor: submitting ? "#555" : "#1DB954",
+                color: "#fff",
+                padding: "0.75rem 2rem",
+                borderRadius: "24px",
+                border: "none",
+                fontWeight: "bold",
+                fontSize: "1rem",
+                cursor: submitting ? "not-allowed" : "pointer",
+                transition: "background-color 0.2s",
+              }}
+            >
+              {submitting ? "Submitting..." : "🚀 Migrate Playlist"}
+            </button>
+          </div>
+        </form>
       </div>
 
       <div style={{ marginTop: "2rem" }}>
