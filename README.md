@@ -6,6 +6,12 @@
 > Jobs are processed in the background while users receive real-time progress updates.
 
 ---
+🎥 Demo
+
+▶ Watch the full demo:
+https://www.youtube.com/watch?v=H2nwC8Jz3JQ
+
+---
 
 ## 📊 Key Metrics
 
