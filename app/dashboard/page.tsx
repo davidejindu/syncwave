@@ -315,7 +315,10 @@ export default function DashboardPage() {
       </div>
     );
 
-  if (!profile)
+  if (!profile) {
+    if (typeof window !== "undefined") {
+      window.location.href = "/api/auth/spotify/login";
+    }
     return (
       <div
         style={{
@@ -327,9 +330,10 @@ export default function DashboardPage() {
           color: "#fff",
         }}
       >
-        Not authenticated
+        Redirecting to Spotify login...
       </div>
     );
+  }
 
   return (
     <main
