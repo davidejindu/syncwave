@@ -16,7 +16,7 @@ https://www.youtube.com/watch?v=H2nwC8Jz3JQ
 ## Key Metrics
 
 - **91% match accuracy** across 1,000+ song migrations  
-- **73% Spotify API call reduction** via DynamoDB result caching  
+- **Spotify API call reduction** via DynamoDB, OAuth 2.0 token persistence   
 - **<200ms API response time** using async queue processing  
 - **5× faster processing** for cached songs  
 
