@@ -66,7 +66,7 @@ Instead of synchronous execution, playlist migrations are queued and processed a
                 │   AWS Lambda      │
                 │   Worker Runtime  │
                 │                   │
-                │ - Process jobs    │
+                │ - Triggered by SQS│
                 │ - Match songs     │
                 │ - Update progress │
                 │ - Cache results   │
@@ -81,3 +81,20 @@ Instead of synchronous execution, playlist migrations are queued and processed a
         │ Spotify API  │        │ YouTube API  │
         │              │        │              │
         └──────────────┘        └──────────────┘
+
+Failure Handling
+──────────────────────────────────────────────
+
+If Lambda processing fails:
+
+SQS → Retry attempts → Lambda
+
+After max retries:
+
+┌──────────────┐
+│   SQS DLQ    │
+│ Dead Letter  │
+│   Queue      │
+└──────────────┘
+
+Failed jobs are isolated for debugging without blocking the queue.
