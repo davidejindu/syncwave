@@ -240,9 +240,9 @@ export default function DashboardPage() {
 
   useEffect(() => {
     // Auto-start worker
-    fetch("/api/worker/auto-start", { credentials: "include" }).catch(() => {
-      console.log("Worker already running or failed to start");
-    });
+    // fetch("/api/worker/auto-start", { credentials: "include" }).catch(() => {
+    //   console.log("Worker already running or failed to start");
+    // });
 
     // Fetch profile and jobs
     fetch("/api/me", {
@@ -395,7 +395,7 @@ export default function DashboardPage() {
       setPlaylistUrl("");
 
       // Start worker if not already running (ignore if already running)
-      fetch("/api/worker/start", { credentials: "include" }).catch(() => {});
+      //fetch("/api/worker/start", { credentials: "include" }).catch(() => {});
 
       // Refresh jobs list
       const jobsRes = await fetch("/api/jobs/list", { credentials: "include" });

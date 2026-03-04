@@ -60,7 +60,7 @@ export async function setCachedMatch(
         },
       })
     );
-    console.log(`✓ Cached: ${youtubeTitle} → ${spotifyName}`);
+  console.log(`Cached: ${youtubeTitle} → ${spotifyName}`);
   } catch (error) {
     console.error("Cache set error:", error);
     // Don't fail job if cache fails
