@@ -6,19 +6,11 @@
 > Jobs are processed in the background while users receive real-time progress updates.
 
 ---
+
 Demo
 
-▶ Watch the full demo:
+▶ Watch the full demo:  
 https://www.youtube.com/watch?v=H2nwC8Jz3JQ
-
----
-
-## Key Metrics
-
-- **91% match accuracy** across 1,000+ song migrations  
-- **Spotify API call reduction** via DynamoDB, OAuth 2.0 token persistence   
-- **<200ms API response time** using async queue processing  
-- **5× faster processing** for cached songs  
 
 ---
 
@@ -29,8 +21,9 @@ SyncWave migrates YouTube playlists to Spotify without forcing users to wait 30+
 Instead of synchronous execution, playlist migrations are queued and processed asynchronously while users can track progress in real time.
 
 ### Key Features
+
 - OAuth 2.0 authentication with Spotify  
-- Async processing using AWS SQS queues  
+- Async processing using **AWS SQS + Lambda workers**  
 - Multi-factor fuzzy matching (title + artist + duration)  
 - DynamoDB result caching for performance  
 - Real-time progress tracking  
@@ -51,28 +44,40 @@ Instead of synchronous execution, playlist migrations are queued and processed a
 └─────────────────────────────────────────────────────────────┘
                          ↓ HTTPS
 ┌─────────────────────────────────────────────────────────────┐
-│              NEXT.JS API + BACKGROUND WORKER                 │
+│                      NEXT.JS API                             │
 │                                                             │
-│  ┌──────────────┐  ┌──────────────┐  ┌─────────────────┐  │
-│  │  Dashboard   │  │  API Routes  │  │ Background Worker│  │
-│  │  (React)     │  │              │  │ (Continuous Poll)│  │
-│  │              │  │ /jobs/submit │  │                  │  │
-│  │ - Form       │  │ /jobs/[id]   │  │ - Poll SQS       │  │
-│  │ - Progress   │  │ /jobs/list   │  │ - Match songs    │  │
-│  │ - Results    │  │              │  │ - Cache results  │  │
-│  └──────────────┘  └──────────────┘  └─────────────────┘  │
+│  ┌──────────────┐  ┌──────────────┐                         │
+│  │  Dashboard   │  │  API Routes  │                         │
+│  │  (React)     │  │              │                         │
+│  │              │  │ /jobs/submit │                         │
+│  │ - Form       │  │ /jobs/[id]   │                         │
+│  │ - Progress   │  │ /jobs/list   │                         │
+│  │ - Results    │  │              │                         │
+│  └──────────────┘  └──────────────┘                         │
 └─────────────────────────────────────────────────────────────┘
-         ↓                    ↓                    ↓
-    ┌─────────┐        ┌──────────┐        ┌──────────────┐
-    │ Spotify │        │   AWS    │        │   YouTube    │
-    │  OAuth  │        │ Services │        │  Data API    │
-    └─────────┘        └──────────┘        └──────────────┘
-                             ↓
-                    ┌────────┴────────┐
-                    ↓                 ↓
-              ┌──────────┐      ┌──────────┐
-              │   SQS    │      │ DynamoDB │
-              │  Queue   │      │  Tables  │
-              │ Job msgs │      │ Jobs +   │
-              │          │      │ Cache    │
-              └──────────┘      └──────────┘
+                         ↓
+                   ┌─────────────┐
+                   │  AWS SQS    │
+                   │   Queue     │
+                   │ Job Messages│
+                   └─────────────┘
+                         ↓
+                ┌───────────────────┐
+                │   AWS Lambda      │
+                │   Worker Runtime  │
+                │                   │
+                │ - Process jobs    │
+                │ - Match songs     │
+                │ - Update progress │
+                │ - Cache results   │
+                └───────────────────┘
+                         ↓
+               ┌──────────────┐
+               │  DynamoDB    │
+               │ Jobs + Cache │
+               └──────────────┘
+                         ↓
+        ┌──────────────┐        ┌──────────────┐
+        │ Spotify API  │        │ YouTube API  │
+        │              │        │              │
+        └──────────────┘        └──────────────┘
