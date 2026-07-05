@@ -31,7 +31,8 @@ export async function GET(req: Request) {
     return NextResponse.json(tokenData, { status: 500 });
   }
 
-  const response = NextResponse.redirect("http://127.0.0.1:3000/dashboard");
+  const url = new URL(req.url);
+  const response = NextResponse.redirect(`${url.origin}/dashboard`);
 
   //Store tokens securely
   response.cookies.set("spotify_access_token", tokenData.access_token, {
