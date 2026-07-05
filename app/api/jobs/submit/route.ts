@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { generateJobId } from "@/app/lib/jobId";
-import { createJob, type Job } from "@/app/lib/dynamodb";
+import { createJob } from "@/lambda/index.mjs";
+import type { Job } from "@/lambda/index.d.mts";
 import { enqueueJob } from "@/app/lib/sqs";
 
 interface SubmitJobRequest {
@@ -50,7 +51,7 @@ export async function POST(req: Request) {
 
   // 3. Parse and validate request
   let body: SubmitJobRequest;
-  
+
   try {
     body = await req.json();
   } catch {
@@ -78,7 +79,7 @@ export async function POST(req: Request) {
 
   // Validate playlist URLs
   const playlistUrls = body.source?.playlistUrls || [];
-  
+
   if (!Array.isArray(playlistUrls) || playlistUrls.length === 0) {
     return NextResponse.json(
       { error: "playlistUrls must be non-empty array" },

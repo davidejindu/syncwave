@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { getJob } from "@/app/lib/dynamodb";
+import { getJob } from "@/lambda/index.mjs";
 
 export async function GET(
   req: Request,

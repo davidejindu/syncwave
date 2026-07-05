@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { refreshSpotifyToken } from "@/app/lib/spotify";
+import { refreshSpotifyToken } from "@/lambda/index.mjs";
 
 export async function GET() {
   const cookieStore = await cookies();
